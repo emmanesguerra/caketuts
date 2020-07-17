@@ -18,6 +18,8 @@ class UsersController extends AppController
      */
     public function index()
     {
+        $this->Authorization->skipAuthorization();
+        
         $users = $this->paginate($this->Users);
 
         $this->set(compact('users'));
@@ -35,8 +37,20 @@ class UsersController extends AppController
         $user = $this->Users->get($id, [
             'contain' => ['Articles'],
         ]);
+        
+        try
+        {
+            $this->Authorization->authorize($user);
 
-        $this->set(compact('user'));
+            $this->set(compact('user'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to view this user details"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
+        }
     }
 
     /**
@@ -45,20 +59,31 @@ class UsersController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
      */
     public function add()
-    {
-        $this->Authorization->skipAuthorization();
-        
+    {        
         $user = $this->Users->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
+        
+        try
+        {
+            $this->Authorization->authorize($user);
+            if ($this->request->is('post')) {
+                $user = $this->Users->patchEntity($user, $this->request->getData());
+                if ($this->Users->save($user)) {
+                    $this->Flash->success(__('The user has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
+            $this->set(compact('user'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to create new users"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
         }
-        $this->set(compact('user'));
+        
     }
 
     /**
@@ -73,16 +98,28 @@ class UsersController extends AppController
         $user = $this->Users->get($id, [
             'contain' => [],
         ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $user = $this->Users->patchEntity($user, $this->request->getData());
-            if ($this->Users->save($user)) {
-                $this->Flash->success(__('The user has been saved.'));
+        
+        try
+        {
+            $this->Authorization->authorize($user);
+            if ($this->request->is(['patch', 'post', 'put'])) {
+                $user = $this->Users->patchEntity($user, $this->request->getData());
+                if ($this->Users->save($user)) {
+                    $this->Flash->success(__('The user has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The user could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The user could not be saved. Please, try again.'));
+            $this->set(compact('user'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to update this user"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
         }
-        $this->set(compact('user'));
     }
 
     /**
@@ -96,10 +133,21 @@ class UsersController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $user = $this->Users->get($id);
-        if ($this->Users->delete($user)) {
-            $this->Flash->success(__('The user has been deleted.'));
-        } else {
-            $this->Flash->error(__('The user could not be deleted. Please, try again.'));
+        
+        try 
+        {
+            $this->Authorization->authorize($user);
+            if ($this->Users->delete($user)) {
+                $this->Flash->success(__('The user has been deleted.'));
+            } else {
+                $this->Flash->error(__('The user could not be deleted. Please, try again.'));
+            }
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to delete this user"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
         }
 
         return $this->redirect(['action' => 'index']);
@@ -110,7 +158,7 @@ class UsersController extends AppController
         parent::beforeFilter($event);
         // Configure the login action to not require authentication, preventing
         // the infinite redirect loop issue
-        $this->Authentication->addUnauthenticatedActions(['login', 'add']);
+        $this->Authentication->addUnauthenticatedActions(['login']);
     }
 
     public function login()
