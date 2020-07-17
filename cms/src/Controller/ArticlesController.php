@@ -51,27 +51,37 @@ class ArticlesController extends AppController
     {
         $article = $this->Articles->newEmptyEntity();
         
-        $this->Authorization->authorize($article);
-        
-        if ($this->request->is('post')) {
-            $article = $this->Articles->patchEntity($article, $this->request->getData());
-            
-            $article->user_id = $this->request->getAttribute('identity')->getIdentifier();
-            
-            if ($this->Articles->save($article)) {
-                $this->Flash->success(__('The article has been saved.'));
+        try
+        {
+            $this->Authorization->authorize($article);
 
-                return $this->redirect(['action' => 'index']);
+            if ($this->request->is('post')) {
+                $article = $this->Articles->patchEntity($article, $this->request->getData());
+
+                $article->user_id = $this->request->getAttribute('identity')->getIdentifier();
+
+                if ($this->Articles->save($article)) {
+                    $this->Flash->success(__('The article has been saved.'));
+
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The article could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The article could not be saved. Please, try again.'));
+            // Get a list of tags.
+            $tags = $this->Articles->Tags->find('list');
+
+            // Set tags to the view context
+            $this->set('tags', $tags);
+
+            $this->set(compact('article'));
+        } catch (Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to update this article titled: " . $article->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
         }
-        // Get a list of tags.
-        $tags = $this->Articles->Tags->find('list');
-
-        // Set tags to the view context
-        $this->set('tags', $tags);
-
-        $this->set(compact('article'));
     }
 
     /**
@@ -88,25 +98,35 @@ class ArticlesController extends AppController
                     ->contain('Tags')
                     ->firstOrFail();
         
-        $this->Authorization->authorize($article);
+        try
+        {
+            $this->Authorization->authorize($article);
 
-        if ($this->request->is(['post', 'put'])) {
-            $article = $this->Articles->patchEntity($article, $this->request->getData(), [
-                'accessibleFields' => ['user_id' => false]
-            ]);
-            if ($this->Articles->save($article)) {
-                $this->Flash->success(__('The article has been saved.'));
+            if ($this->request->is(['post', 'put'])) {
+                $article = $this->Articles->patchEntity($article, $this->request->getData(), [
+                    'accessibleFields' => ['user_id' => false]
+                ]);
+                if ($this->Articles->save($article)) {
+                    $this->Flash->success(__('The article has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The article could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The article could not be saved. Please, try again.'));
-        }
-        // Get a list of tags.
-        $tags = $this->Articles->Tags->find('list');
+            // Get a list of tags.
+            $tags = $this->Articles->Tags->find('list');
 
-        // Set tags to the view context
-        $this->set('tags', $tags);
-        $this->set(compact('article'));
+            // Set tags to the view context
+            $this->set('tags', $tags);
+            $this->set(compact('article'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to update this article titled: " . $article->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
+        }
     }
 
     /**
@@ -122,12 +142,21 @@ class ArticlesController extends AppController
         
         $article = $this->Articles->findBySlug($slug)->firstOrFail();
         
-        $this->Authorization->authorize($article);
-        
-        if ($this->Articles->delete($article)) {
-            $this->Flash->success(__('The article has been deleted.'));
-        } else {
-            $this->Flash->error(__('The article could not be deleted. Please, try again.'));
+        try
+        {
+            $this->Authorization->authorize($article);
+
+            if ($this->Articles->delete($article)) {
+                $this->Flash->success(__('The article has been deleted.'));
+            } else {
+                $this->Flash->error(__('The article could not be deleted. Please, try again.'));
+            }
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to delete this article titled: " . $article->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
         }
 
         return $this->redirect(['action' => 'index']);

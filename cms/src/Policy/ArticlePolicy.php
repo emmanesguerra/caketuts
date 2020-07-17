@@ -42,7 +42,11 @@ class ArticlePolicy
      */
     public function canDelete(IdentityInterface $user, Article $article)
     {
-        return $this->isAuthor($user, $article);
+        if($this->isAdmin($user, $article)) {
+            return true;
+        } else {
+            return $this->isAuthor($user, $article);
+        }
     }
 
     /**
@@ -65,11 +69,20 @@ class ArticlePolicy
     public function canEdit(IdentityInterface $user, Article $article)
     {
         // logged in users can edit their own articles.
-        return $this->isAuthor($user, $article);
+        if($this->isAdmin($user, $article)) {
+            return true;
+        } else {
+            return $this->isAuthor($user, $article);
+        }
     }
 
     protected function isAuthor(IdentityInterface $user, Article $article)
     {
         return $article->user_id === $user->getIdentifier();
+    }
+
+    protected function isAdmin(IdentityInterface $user, Article $article)
+    {
+        return $user->is_admin;
     }
 }
