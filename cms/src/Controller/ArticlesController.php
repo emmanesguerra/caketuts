@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -18,8 +17,8 @@ class ArticlesController extends AppController
      */
     public function index()
     {
-        $articles = $this->paginate($this->Articles);
-
+        $this->loadComponent('Paginator');
+        $articles = $this->Paginator->paginate($this->Articles->find());
         $this->set(compact('articles'));
     }
 
@@ -30,12 +29,9 @@ class ArticlesController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function view($id = null)
+    public function view($slug = null)
     {
-        $article = $this->Articles->get($id, [
-            'contain' => [],
-        ]);
-
+        $article = $this->Articles->findBySlug($slug)->firstOrFail();
         $this->set(compact('article'));
     }
 
@@ -49,6 +45,8 @@ class ArticlesController extends AppController
         $article = $this->Articles->newEmptyEntity();
         if ($this->request->is('post')) {
             $article = $this->Articles->patchEntity($article, $this->request->getData());
+            $article->user_id = 1;
+            
             if ($this->Articles->save($article)) {
                 $this->Flash->success(__('The article has been saved.'));
 
@@ -66,12 +64,13 @@ class ArticlesController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit($slug = null)
     {
-        $article = $this->Articles->get($id, [
-            'contain' => [],
-        ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
+        $article = $this->Articles
+                        ->findBySlug($slug)
+                        ->firstOrFail();
+        
+        if ($this->request->is(['post', 'put'])) {
             $article = $this->Articles->patchEntity($article, $this->request->getData());
             if ($this->Articles->save($article)) {
                 $this->Flash->success(__('The article has been saved.'));
@@ -90,10 +89,11 @@ class ArticlesController extends AppController
      * @return \Cake\Http\Response|null|void Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null)
+    public function delete($slug = null)
     {
         $this->request->allowMethod(['post', 'delete']);
-        $article = $this->Articles->get($id);
+        
+        $article = $this->Articles->findBySlug($slug)->firstOrFail();
         if ($this->Articles->delete($article)) {
             $this->Flash->success(__('The article has been deleted.'));
         } else {
