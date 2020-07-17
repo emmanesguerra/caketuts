@@ -113,7 +113,7 @@ class TagsController extends AppController
             }
             $articles = $this->Tags->Articles->find('list', ['limit' => 200]);
             $this->set(compact('tag', 'articles'));
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             if($ex->getCode() == 403) {
                 $this->Flash->error(__("You're not allowed to update this tag titled: " . $tag->title));
             } else {
@@ -144,7 +144,7 @@ class TagsController extends AppController
             } else {
                 $this->Flash->error(__('The tag could not be deleted. Please, try again.'));
             }
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             if($ex->getCode() == 403) {
                 $this->Flash->error(__("You're not allowed to delete this tag titled: " . $tag->title));
             } else {
