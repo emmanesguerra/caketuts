@@ -18,11 +18,21 @@ class UsersController extends AppController
      */
     public function index()
     {
-        $this->Authorization->skipAuthorization();
-        
-        $users = $this->paginate($this->Users);
+        try
+        {
+            $this->Authorization->authorize($this->request->getSession()->read('Auth'));
 
-        $this->set(compact('users'));
+            $users = $this->paginate($this->Users);
+
+            $this->set(compact('users'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to access user module"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect([ 'controller' => 'Articles', 'action' => 'index']);
+        }
     }
 
     /**

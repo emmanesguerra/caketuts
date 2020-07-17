@@ -57,6 +57,12 @@ class UserPolicy
         return $this->isAdmin($user, $resource);
     }
     
+    public function canIndex(IdentityInterface $user)
+    {
+        // All logged in users can create articles.
+        return $this->isAdmin($user);
+    }
+    
     public function canAdd(IdentityInterface $user, User $resource)
     {
         // All logged in users can create articles.
@@ -68,7 +74,7 @@ class UserPolicy
         return $this->isAdmin($user, $resource);
     }
 
-    protected function isAdmin(IdentityInterface $user, User $resource)
+    protected function isAdmin(IdentityInterface $user, User $resource = null)
     {
         return $user->is_admin;
     }
