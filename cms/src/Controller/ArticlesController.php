@@ -54,6 +54,12 @@ class ArticlesController extends AppController
             }
             $this->Flash->error(__('The article could not be saved. Please, try again.'));
         }
+        // Get a list of tags.
+        $tags = $this->Articles->Tags->find('list');
+
+        // Set tags to the view context
+        $this->set('tags', $tags);
+
         $this->set(compact('article'));
     }
 
@@ -79,6 +85,11 @@ class ArticlesController extends AppController
             }
             $this->Flash->error(__('The article could not be saved. Please, try again.'));
         }
+        // Get a list of tags.
+        $tags = $this->Articles->Tags->find('list');
+
+        // Set tags to the view context
+        $this->set('tags', $tags);
         $this->set(compact('article'));
     }
 
@@ -101,5 +112,19 @@ class ArticlesController extends AppController
         }
 
         return $this->redirect(['action' => 'index']);
+    }
+    
+    public function tags(...$tags)
+    {
+        // Use the ArticlesTable to find tagged articles.
+        $articles = $this->Articles->find('tagged', [
+            'tags' => $tags
+        ]);
+
+        // Pass variables into the view template context.
+        $this->set([
+            'articles' => $articles,
+            'tags' => $tags
+        ]);
     }
 }
