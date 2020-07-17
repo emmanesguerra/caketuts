@@ -18,6 +18,8 @@ class TagsController extends AppController
      */
     public function index()
     {
+        $this->Authorization->skipAuthorization();
+        
         $tags = $this->paginate($this->Tags);
 
         $this->set(compact('tags'));
@@ -35,8 +37,20 @@ class TagsController extends AppController
         $tag = $this->Tags->get($id, [
             'contain' => ['Articles'],
         ]);
+        
+        try
+        {
+            $this->Authorization->authorize($tag);
 
-        $this->set(compact('tag'));
+            $this->set(compact('tag'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to view this tag titled: " . $tag->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
+        }
     }
 
     /**
@@ -47,17 +61,29 @@ class TagsController extends AppController
     public function add()
     {
         $tag = $this->Tags->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $tag = $this->Tags->patchEntity($tag, $this->request->getData());
-            if ($this->Tags->save($tag)) {
-                $this->Flash->success(__('The tag has been saved.'));
+        
+        try
+        {
+            $this->Authorization->authorize($tag);
+            if ($this->request->is('post')) {
+                $tag = $this->Tags->patchEntity($tag, $this->request->getData());
+                if ($this->Tags->save($tag)) {
+                    $this->Flash->success(__('The tag has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The tag could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The tag could not be saved. Please, try again.'));
+            $articles = $this->Tags->Articles->find('list', ['limit' => 200]);
+            $this->set(compact('tag', 'articles'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to create new tags "));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
         }
-        $articles = $this->Tags->Articles->find('list', ['limit' => 200]);
-        $this->set(compact('tag', 'articles'));
     }
 
     /**
@@ -72,17 +98,30 @@ class TagsController extends AppController
         $tag = $this->Tags->get($id, [
             'contain' => ['Articles'],
         ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $tag = $this->Tags->patchEntity($tag, $this->request->getData());
-            if ($this->Tags->save($tag)) {
-                $this->Flash->success(__('The tag has been saved.'));
+        
+        try
+        {
+            $this->Authorization->authorize($tag);
+            if ($this->request->is(['patch', 'post', 'put'])) {
+                $tag = $this->Tags->patchEntity($tag, $this->request->getData());
+                if ($this->Tags->save($tag)) {
+                    $this->Flash->success(__('The tag has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                    return $this->redirect(['action' => 'index']);
+                }
+                $this->Flash->error(__('The tag could not be saved. Please, try again.'));
             }
-            $this->Flash->error(__('The tag could not be saved. Please, try again.'));
+            $articles = $this->Tags->Articles->find('list', ['limit' => 200]);
+            $this->set(compact('tag', 'articles'));
+        } catch (Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to update this tag titled: " . $tag->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect(['action' => 'index']);
         }
-        $articles = $this->Tags->Articles->find('list', ['limit' => 200]);
-        $this->set(compact('tag', 'articles'));
+        
     }
 
     /**
@@ -96,10 +135,21 @@ class TagsController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $tag = $this->Tags->get($id);
-        if ($this->Tags->delete($tag)) {
-            $this->Flash->success(__('The tag has been deleted.'));
-        } else {
-            $this->Flash->error(__('The tag could not be deleted. Please, try again.'));
+        
+        try
+        {
+            $this->Authorization->authorize($tag);
+            if ($this->Tags->delete($tag)) {
+                $this->Flash->success(__('The tag has been deleted.'));
+            } else {
+                $this->Flash->error(__('The tag could not be deleted. Please, try again.'));
+            }
+        } catch (Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to delete this tag titled: " . $tag->title));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
         }
 
         return $this->redirect(['action' => 'index']);
