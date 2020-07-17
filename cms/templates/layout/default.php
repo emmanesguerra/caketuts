@@ -15,6 +15,9 @@
  */
 
 $cakeDescription = 'CakePHP: the rapid development php framework';
+
+$email = $this->request->getSession()->read('Auth.email');
+$is_admin = $this->request->getSession()->read('Auth.is_admin');
 ?>
 <!DOCTYPE html>
 <html>
@@ -44,6 +47,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
             <a target="_blank" rel="noopener" href="https://book.cakephp.org/4/">Documentation</a>
             <a target="_blank" rel="noopener" href="https://api.cakephp.org/4/">API</a>
         </div>
+        Good day, <?=($is_admin)? "Admin ": ""?> <?=$email?>
     </nav>
     <main class="main">
         <div class="container">
