@@ -24,6 +24,13 @@ class ArticlesTable extends Table
             'joinTable' => 'articles_tags',
             'dependent' => true
         ]);
+        
+        $this->hasOne('Users', [
+                'className' => 'Users'
+            ])
+            ->setBindingKey('user_id')
+            ->setForeignKey('id')
+            ->setProperty('user');
     }
     
     public function beforeSave(EventInterface $event, $entity, $options)

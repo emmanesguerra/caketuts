@@ -20,7 +20,7 @@ class ArticlesController extends AppController
         $this->Authorization->skipAuthorization();
         
         $this->loadComponent('Paginator');
-        $articles = $this->Paginator->paginate($this->Articles->find());
+        $articles = $this->Paginator->paginate($this->Articles->find()->contain(['Users']));
         $this->set(compact('articles'));
     }
 
