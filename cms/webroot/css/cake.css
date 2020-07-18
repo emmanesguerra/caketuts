@@ -36,6 +36,10 @@ th a,
     color: #606c76;
 }
 
+.top-nav-links a:hover {
+    color: #d33c43;
+}
+
 .side-nav a:hover,
 .side-nav a:focus,
 .actions a:hover,
