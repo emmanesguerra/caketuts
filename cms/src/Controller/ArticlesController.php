@@ -37,7 +37,7 @@ class ArticlesController extends AppController
         
         $article = $this->Articles
                     ->findBySlug($slug)
-                    ->contain('Tags')
+                    ->contain(['Users', 'Tags'])
                     ->firstOrFail();
         $this->set(compact('article'));
     }
