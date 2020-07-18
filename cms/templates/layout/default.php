@@ -34,6 +34,7 @@ $isloggedin = $this->request->getSession()->check('Auth');
     <link href="https://fonts.googleapis.com/css?family=Raleway:400,700" rel="stylesheet">
 
     <?= $this->Html->css(['normalize.min', 'milligram.min', 'cake']) ?>
+    <?= $this->Html->script('ckeditor/ckeditor', array('inline' => false)); ?>
 
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
@@ -59,4 +60,12 @@ $isloggedin = $this->request->getSession()->check('Auth');
     <footer>
     </footer>
 </body>
+<script>
+    
+    var editor=CKEDITOR.replace('ckeditor' , {
+       extraPlugins : 'filebrowser' ,
+       filebrowserUploadUrl: '/upload.php',
+       filebrowserUploadMethod: 'form'
+    });
+</script>
 </html>
