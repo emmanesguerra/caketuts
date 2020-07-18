@@ -27,7 +27,7 @@ class TagsController extends AppController
             $this->set(compact('tags'));
         } catch (\Exception $ex) {
             if($ex->getCode() == 403) {
-                $this->Flash->error(__("You're not allowed to access user module"));
+                $this->Flash->error(__("You're not allowed to access tags module"));
             } else {
                 $this->Flash->error($ex->getMessage());
             }
