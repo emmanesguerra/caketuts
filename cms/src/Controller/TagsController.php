@@ -18,11 +18,21 @@ class TagsController extends AppController
      */
     public function index()
     {
-        $this->Authorization->skipAuthorization();
+        try
+        {
+            $this->Authorization->authorize($this->request->getSession()->read('Auth'), 'index');
         
-        $tags = $this->paginate($this->Tags);
+            $tags = $this->paginate($this->Tags);
 
-        $this->set(compact('tags'));
+            $this->set(compact('tags'));
+        } catch (\Exception $ex) {
+            if($ex->getCode() == 403) {
+                $this->Flash->error(__("You're not allowed to access user module"));
+            } else {
+                $this->Flash->error($ex->getMessage());
+            }
+            return $this->redirect([ 'controller' => 'Articles', 'action' => 'index']);
+        }
     }
 
     /**
