@@ -213,3 +213,8 @@ ServerRequest::addDetector('tablet', function ($request) {
 //Inflector::rules('irregular', ['red' => 'redlings']);
 //Inflector::rules('uninflected', ['dontinflectme']);
 //Inflector::rules('transliteration', ['/å/' => 'aa']);
+
+//add authorization to debugkit
+Configure::write('DebugKit.ignoreAuthorization', true);
+//disable debugkit
+Configure::write('debug', 0);
