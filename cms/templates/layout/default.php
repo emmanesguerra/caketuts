@@ -18,6 +18,7 @@ $cakeDescription = 'CakePHP: the rapid development php framework';
 
 $email = $this->request->getSession()->read('Auth.email');
 $is_admin = $this->request->getSession()->read('Auth.is_admin');
+$isloggedin = $this->request->getSession()->check('Auth');
 ?>
 <!DOCTYPE html>
 <html>
@@ -45,7 +46,9 @@ $is_admin = $this->request->getSession()->read('Auth.is_admin');
             <?= $this->Html->link('Articles', ['action' => 'index', 'controller' => 'Articles']) ?> |
             <?= $this->Html->link('Tags', ['action' => 'index', 'controller' => 'Tags']) ?> 
         </div>
-        Good day, <?=($is_admin)? "Admin ": ""?> <?=$email?>
+        <div class="top-nav-links">
+            <small>Good day, <?=($is_admin)? "Admin ": ""?> <?=$email?> <br > <?= ($isloggedin) ? "Do you wish to logout?" . $this->Html->link('Yes', ['action' => 'logout', 'controller' => 'Users']) : "" ?>  </small>
+        </div>
     </nav>
     <main class="main">
         <div class="container">
