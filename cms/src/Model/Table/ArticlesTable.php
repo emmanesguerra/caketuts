@@ -50,11 +50,20 @@ class ArticlesTable extends Table
     {
         $validator
             ->notEmptyString('title')
-            ->minLength('title', 10)
-            ->maxLength('title', 255)
+            ->add('title', [
+                'length' => [
+                    'rule' => ['minLength', 10],
+                    'message' => 'Titles need to be at least 10 characters long',
+                ]
+            ])
 
             ->notEmptyString('body')
-            ->minLength('body', 10);
+            ->add('body', [
+                'length' => [
+                    'rule' => ['minLength', 20],
+                    'message' => "Body length doesn't reach the minimum count",
+                ]
+            ]);
 
         return $validator;
     }
