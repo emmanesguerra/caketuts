@@ -42,7 +42,7 @@ class TagPolicy
      */
     public function canDelete(IdentityInterface $user, Tag $tag)
     {
-        return $this->isAdmin($user, $tag);
+        return $this->isAdmin($user);
     }
 
     /**
@@ -54,21 +54,20 @@ class TagPolicy
      */
     public function canView(IdentityInterface $user, Tag $tag)
     {
-        return $this->isAdmin($user, $tag);
+        return $this->isAdmin($user);
     }
     
     public function canAdd(IdentityInterface $user, Tag $tag)
     {
-        // All logged in users can create articles.
-        return $this->isAdmin($user, $tag);
+        return $this->isAdmin($user);
     }
 
     public function canEdit(IdentityInterface $user, Tag $tag)
     {
-        return $this->isAdmin($user, $tag);
+        return $this->isAdmin($user);
     }
 
-    protected function isAdmin(IdentityInterface $user, Tag $tag)
+    protected function isAdmin(IdentityInterface $user)
     {
         return $user->is_admin;
     }

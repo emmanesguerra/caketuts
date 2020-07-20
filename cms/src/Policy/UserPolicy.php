@@ -54,27 +54,25 @@ class UserPolicy
      */
     public function canView(IdentityInterface $user, User $resource)
     {
-        return $this->isAdmin($user, $resource);
+        return $this->isAdmin($user);
     }
     
     public function canIndex(IdentityInterface $user)
     {
-        // All logged in users can create articles.
         return $this->isAdmin($user);
     }
     
     public function canAdd(IdentityInterface $user, User $resource)
     {
-        // All logged in users can create articles.
-        return $this->isAdmin($user, $resource);
+        return $this->isAdmin($user);
     }
 
     public function canEdit(IdentityInterface $user, User $resource)
     {
-        return $this->isAdmin($user, $resource);
+        return $this->isAdmin($user);
     }
 
-    protected function isAdmin(IdentityInterface $user, User $resource = null)
+    protected function isAdmin(IdentityInterface $user)
     {
         return $user->is_admin;
     }

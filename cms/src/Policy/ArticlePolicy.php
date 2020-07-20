@@ -68,7 +68,7 @@ class ArticlePolicy
 
     public function canEdit(IdentityInterface $user, Article $article)
     {
-        // logged in users can edit their own articles.
+        // normal users can edit their own articles. while admin user can edit all
         if($this->isAdmin($user, $article)) {
             return true;
         } else {
